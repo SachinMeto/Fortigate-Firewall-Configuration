@@ -1,0 +1,121 @@
+
+//Created two firewalls FWDUN and FWRAM for the two sites in VMWare using FortiGate
+//To configure host name
+[FWDUN]
+config system global
+set hostname FWDUN
+end
+[FWRAM]
+config system global
+set hostname FWRAM
+end
+
+//To configure port1 as outside 
+[FWDUN]
+config system interface
+edit port1
+ set ip 192.168.88.10 255.255.255.0
+ set alias “Outside”
+ set allowaccess http https ping ssh
+ set role wan
+end
+[FWRAM]
+config system interface
+edit port1
+ set ip 192.168.88.11 255.255.255.0
+ set alias “Outside”
+ set allowaccess http https ping ssh
+ set role wan
+end
+
+//To configure port2 as Inside
+[FWDUN]
+config system interface
+edit port2
+ set ip 192.168.1.1 255.255.255.0
+ set allowaccess ping
+ set alias “Inside”
+ set role lan
+end
+[FWRAM]
+config system interface
+edit port2
+ set ip 192.168.2.1 255.255.255.0
+ set allowaccess ping
+ set alias “Inside”
+ set role lan
+end
+
+//To configure port3 as DMZ
+[FWDUN]
+config system interface
+edit port3
+ set ip 192.168.3.1 255.255.255.0
+ set allowaccess ping
+ set alias “DMZ”
+ set role dmz
+end
+[FWRAM]
+config system interface
+edit port3
+ set ip 192.168.4.1 255.255.255.0
+ set allowaccess ping
+ set alias “DMZ”
+ set role dmz
+end
+
+//Defining address object InsideLAN in both firewalls
+[FWDUN]
+config firewall address
+ edit “InsideLAN”
+ set associated-interface “port2”
+ set subnet 192.168.1.0 255.255.255.0
+ end
+[FWRAM]
+config firewall address
+ edit “InsideLAN”
+ set associated-interface “port2”
+ set subnet 192.168.2.0 255.255.255.0
+ end
+
+//Firewall address for RemoteLAN
+[FWDUN]
+config firewall address
+ edit “RemoteLAN2”
+ set associated-interface “port3”
+ set subnet 192.168.1.0 255.255.255.0
+ end
+[FWRAM]
+config firewall address
+ edit “RemoteLAN1”
+ set associated-interface “port3”
+ set subnet 192.168.2.0 255.255.255.0
+ end
+
+//To allow client on insideLAN passthrouh firewall
+[FWDUN]
+config firewall policy
+edit 1
+ set name “Inside->Outside”
+ set srcintf “port2”
+ set dstinft “port1”
+ set srcaddr “InsideLAN”
+ set dstaddr “all”
+ set action accept
+ set schedule “always”
+ set service “ALL”
+ set nat enable
+next
+[FWRAM]
+config firewall policy
+edit 1
+ set name “Inside->Outside”
+ set srcintf “port2”
+ set dstinft “port1”
+ set srcaddr “InsideLAN”
+ set dstaddr “all”
+ set action accept
+ set schedule “always”
+ set service “ALL”
+ set nat enable
+next

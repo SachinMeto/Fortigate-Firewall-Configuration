@@ -1,0 +1,19 @@
+External vendor connectivity with DMZ Network.
+
+//To configure port3 as DMZ
+[FWDUN]
+config system interface
+edit port3
+ set ip 192.168.3.1 255.255.255.0
+ set allowaccess ping
+ set alias “DMZ”
+ set role dmz
+end
+[FWRAM]
+config system interface
+edit port3
+ set ip 192.168.4.1 255.255.255.0
+ set allowaccess ping
+ set alias “DMZ”
+ set role dmz
+end
